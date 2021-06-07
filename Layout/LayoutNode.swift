@@ -841,7 +841,11 @@ public class LayoutNode: NSObject {
             return
         }
         _view?.removeFromSuperview()
+  <<<<<<< swift-4.2-support
+        for controller in viewControllers {
+  =======
         for controller in _viewControllers {
+  >>>>>>> master
             controller.removeFromParent()
         }
     }
@@ -2444,8 +2448,17 @@ public class LayoutNode: NSObject {
             contentInset.right = try cgFloatValue(forSymbol: "contentInset.right")
         }
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias ContentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior
+            #else
+                typealias ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior
+            #endif
             let contentInsetAdjustmentBehavior = try value(forSymbol: "contentInsetAdjustmentBehavior") as!
+  <<<<<<< swift-4.2-support
+                ContentInsetAdjustmentBehavior
+  =======
                 UIScrollView.ContentInsetAdjustmentBehavior
+  >>>>>>> master
             switch contentInsetAdjustmentBehavior {
             case .automatic, .scrollableAxes:
                 var contentInset = contentInset
@@ -2617,11 +2630,16 @@ public class LayoutNode: NSObject {
         }
         // Try intrinsic size
         var size = intrinsicSize
+  <<<<<<< swift-4.2-support
+        if size.width != UIView.noIntrinsicMetric || size.height != UIView.noIntrinsicMetric {
+            let explicitWidth = try computeExplicitWidth()
+  =======
         if _evaluating.contains("__maxSize") {
             return size
         }
         if size.width != UIView.noIntrinsicMetric || size.height != UIView.noIntrinsicMetric {
             let explicitWidth = try computeMaxWidth()
+  >>>>>>> master
             if let explicitWidth = explicitWidth {
                 size.width = explicitWidth
             }
@@ -2837,7 +2855,11 @@ public class LayoutNode: NSObject {
             return
         }
         unbind()
+  <<<<<<< swift-4.2-support
+        for controller in viewControllers {
+  =======
         for controller in _viewControllers {
+  >>>>>>> master
             controller.removeFromParent()
         }
         _view?.removeFromSuperview()

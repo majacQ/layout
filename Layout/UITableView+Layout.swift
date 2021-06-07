@@ -55,6 +55,9 @@ private extension UITableView {
 extension UITableView: LayoutBacked {
     open override class func create(with node: LayoutNode) throws -> UITableView {
         let style = try node.value(forExpression: "style") as? UITableView.Style ?? .plain
+  <<<<<<< swift-4.2-support
+        let tableView = self.init(frame: .zero, style: style)
+  =======
         let tableView: UITableView = {
             if self == UITableView.self {
                 return LayoutTableView(frame: .zero, style: style)
@@ -69,6 +72,7 @@ extension UITableView: LayoutBacked {
                 return self.init(frame: .zero, style: style)
             }
         }()
+  >>>>>>> master
         tableView.enableAutoSizing()
         return tableView
     }

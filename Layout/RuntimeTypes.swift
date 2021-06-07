@@ -176,12 +176,24 @@ public extension RuntimeType {
         ] as [String: UIAccessibilityTraits]))
         type.caster = { value in
             if let values = value as? [UIAccessibilityTraits] {
+  <<<<<<< swift-4.2-support
+                #if swift(>=4.2)
+                    return UIAccessibilityTraits(rawValue: values.map { $0.rawValue}.reduce(0 as UInt64) { $0 + $1 })
+                #else
+                    return values.reduce(0) { $0 + $1 }
+                #endif
+  =======
                 return UIAccessibilityTraits(rawValue: values.map { $0.rawValue }.reduce(0 as UInt64) { $0 + $1 })
+  >>>>>>> master
             }
             return value as? UIAccessibilityTraits
         }
         return type
     }()
+
+    // Deprecated
+
+
 
     // MARK: Geometry
 
@@ -334,6 +346,8 @@ public extension RuntimeType {
         "no": .no,
         "yes": .yes,
     ] as [String: UITextAutocorrectionType])
+  <<<<<<< swift-4.2-support
+  =======
     @objc static let uiTextContentType: RuntimeType = {
         if #available(iOS 10.0, *) {
             var contentTypes = [
@@ -415,6 +429,7 @@ public extension RuntimeType {
         return .any
     }()
 
+  >>>>>>> master
     @objc static let uiTextSmartQuotesType: RuntimeType = {
         if #available(iOS 11.0, *) {
             return RuntimeType([
@@ -725,12 +740,21 @@ public extension RuntimeType {
 
     @objc static let uiScrollView_ContentInsetAdjustmentBehavior: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias ContentInsetAdjustmentBehavior = UIScrollView.ContentInsetAdjustmentBehavior
+            #else
+                typealias ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior
+            #endif
             return RuntimeType([
                 "automatic": .automatic,
                 "scrollableAxes": .scrollableAxes,
                 "never": .never,
                 "always": .always,
+  <<<<<<< swift-4.2-support
+            ] as [String: ContentInsetAdjustmentBehavior])
+  =======
             ] as [String: UIScrollView.ContentInsetAdjustmentBehavior])
+  >>>>>>> master
         }
         return RuntimeType([
             "automatic": 0,
@@ -740,10 +764,13 @@ public extension RuntimeType {
         ] as [String: Int])
     }()
 
+  <<<<<<< swift-4.2-support
+  =======
     @objc static let uiScrollView_DecelerationRate = RuntimeType([
         "normal": .normal,
         "fast": .fast,
     ] as [String: UIScrollView.DecelerationRate])
+  >>>>>>> master
     @objc static let uiScrollView_IndicatorStyle = RuntimeType([
         "default": .default,
         "black": .black,
@@ -774,11 +801,20 @@ public extension RuntimeType {
     ] as [String: UICollectionView.ScrollDirection])
     @objc static let uiCollectionView_ReorderingCadence: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias ReorderingCadence = UICollectionView.ReorderingCadence
+            #else
+                typealias ReorderingCadence = UICollectionViewReorderingCadence
+            #endif
             return RuntimeType([
                 "immediate": .immediate,
                 "fast": .fast,
                 "slow": .slow,
+  <<<<<<< swift-4.2-support
+            ] as [String: ReorderingCadence])
+  =======
             ] as [String: UICollectionView.ReorderingCadence])
+  >>>>>>> master
         }
         return RuntimeType([
             "immediate": 0,
@@ -786,14 +822,26 @@ public extension RuntimeType {
             "slow": 2,
         ] as [String: Int])
     }()
+  <<<<<<< swift-4.2-support
+  =======
 
+  >>>>>>> master
     @objc static let uiCollectionViewFlowLayout_SectionInsetReference: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias SectionInsetReference = UICollectionViewFlowLayout.SectionInsetReference
+            #else
+                typealias SectionInsetReference = UICollectionViewFlowLayoutSectionInsetReference
+            #endif
             return RuntimeType([
                 "fromContentInset": .fromContentInset,
                 "fromSafeArea": .fromSafeArea,
                 "fromLayoutMargins": .fromLayoutMargins,
+  <<<<<<< swift-4.2-support
+            ] as [String: SectionInsetReference])
+  =======
             ] as [String: UICollectionViewFlowLayout.SectionInsetReference])
+  >>>>>>> master
         }
         return RuntimeType([
             "fromContentInset": 0,
@@ -841,11 +889,19 @@ public extension RuntimeType {
     ] as [String: UIStackView.Alignment])
 
     // Deprecated
+  <<<<<<< swift-4.2-support
 
     @objc static var uiLayoutConstraintAxis: RuntimeType { return nsLayoutConstraint_Axis }
     @objc static var uiStackViewDistribution: RuntimeType { return uiStackView_Distribution }
     @objc static var uiStackViewAlignment: RuntimeType { return uiStackView_Alignment }
 
+  =======
+
+    @objc static var uiLayoutConstraintAxis: RuntimeType { return nsLayoutConstraint_Axis }
+    @objc static var uiStackViewDistribution: RuntimeType { return uiStackView_Distribution }
+    @objc static var uiStackViewAlignment: RuntimeType { return uiStackView_Alignment }
+
+  >>>>>>> master
     // MARK: UITableViewCell
 
     @objc static let uiTableViewCell_AccessoryType = RuntimeType([
@@ -893,10 +949,19 @@ public extension RuntimeType {
     ] as [String: UITableView.Style])
     @objc static let uiTableView_SeparatorInsetReference: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias SeparatorInsetReference = UITableView.SeparatorInsetReference
+            #else
+                typealias SeparatorInsetReference = UITableViewSeparatorInsetReference
+            #endif
             return RuntimeType([
                 "fromCellEdges": .fromCellEdges,
                 "fromAutomaticInsets": .fromAutomaticInsets,
+  <<<<<<< swift-4.2-support
+            ] as [String: SeparatorInsetReference])
+  =======
             ] as [String: UITableView.SeparatorInsetReference])
+  >>>>>>> master
         }
         return RuntimeType([
             "fromCellEdges": 0,
@@ -908,6 +973,28 @@ public extension RuntimeType {
 
     @objc static var uiTableViewStyle: RuntimeType { return uiTableView_Style }
     @objc static var uiTableViewSeparatorInsetReference: RuntimeType { return uiTableView_SeparatorInsetReference }
+  <<<<<<< swift-4.2-support
+
+    // MARK: UIWebView
+
+    @objc static let uiWebView_PaginationMode = RuntimeType([
+        "unpaginated": .unpaginated,
+        "leftToRight": .leftToRight,
+        "topToBottom": .topToBottom,
+        "bottomToTop": .bottomToTop,
+        "rightToLeft": .rightToLeft,
+    ] as [String: UIWebView.PaginationMode])
+    @objc static let uiWebView_PaginationBreakingMode = RuntimeType([
+        "page": .page,
+        "column": .column,
+    ] as [String: UIWebView.PaginationBreakingMode])
+
+    // Deprecated
+
+    @objc static var uiWebPaginationMode: RuntimeType { return uiWebView_PaginationMode }
+    @objc static var uiWebPaginationBreakingMode: RuntimeType { return uiWebView_PaginationBreakingMode }
+  =======
+  >>>>>>> master
 
     // MARK: WebKit
 
@@ -996,12 +1083,21 @@ public extension RuntimeType {
 
     @objc static let uiCloudSharingController_PermissionOptions: RuntimeType = {
         if #available(iOS 10.0, *) {
+            #if swift(>=4.2)
+                typealias PermissionOptions = UICloudSharingController.PermissionOptions
+            #else
+                typealias PermissionOptions = UICloudSharingPermissionOptions
+            #endif
             return RuntimeType([
                 "allowPublic": .allowPublic,
                 "allowPrivate": .allowPrivate,
                 "allowReadOnly": .allowReadOnly,
                 "allowReadWrite": .allowReadWrite,
+  <<<<<<< swift-4.2-support
+            ] as [String: PermissionOptions])
+  =======
             ] as [String: UICloudSharingController.PermissionOptions])
+  >>>>>>> master
         }
         return RuntimeType([
             "allowPublic": 0,
@@ -1032,17 +1128,29 @@ public extension RuntimeType {
     ] as [String: UIImagePickerController.CameraFlashMode])
     @objc static let uiImagePickerController_ImageURLExportPreset: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias ImageURLExportPreset = UIImagePickerController.ImageURLExportPreset
+            #else
+                typealias ImageURLExportPreset = UIImagePickerControllerImageURLExportPreset
+            #endif
             return RuntimeType([
                 "compatible": .compatible,
                 "current": .current,
+  <<<<<<< swift-4.2-support
+            ] as [String: ImageURLExportPreset])
+  =======
             ] as [String: UIImagePickerController.ImageURLExportPreset])
+  >>>>>>> master
         }
         return RuntimeType([
             "compatible": IntOptionSet(rawValue: 1),
             "current": IntOptionSet(rawValue: 2),
         ] as [String: IntOptionSet])
     }()
+  <<<<<<< swift-4.2-support
+  =======
 
+  >>>>>>> master
     @objc static let uiImagePickerController_SourceType = RuntimeType([
         "photoLibrary": .photoLibrary,
         "camera": .camera,
@@ -1076,10 +1184,19 @@ public extension RuntimeType {
     ] as [String: UISplitViewController.DisplayMode])
     @objc static let uiSplitViewController_PrimaryEdge: RuntimeType = {
         if #available(iOS 11.0, *) {
+            #if swift(>=4.2)
+                typealias PrimaryEdge = UISplitViewController.PrimaryEdge
+            #else
+                typealias PrimaryEdge = UISplitViewControllerPrimaryEdge
+            #endif
             return RuntimeType([
                 "leading": .leading,
                 "trailing": .trailing,
+  <<<<<<< swift-4.2-support
+            ] as [String: PrimaryEdge])
+  =======
             ] as [String: UISplitViewController.PrimaryEdge])
+  >>>>>>> master
         }
         return RuntimeType([
             "leading": 0,
@@ -1091,6 +1208,8 @@ public extension RuntimeType {
 
     @objc static var uiSplitViewControllerDisplayMode: RuntimeType { return uiSplitViewController_DisplayMode }
     @objc static var uiSplitViewControllerPrimaryEdge: RuntimeType { return uiSplitViewController_PrimaryEdge }
+  <<<<<<< swift-4.2-support
+  =======
 
     // MARK: UIVisualEffectView
 
@@ -1125,4 +1244,5 @@ public extension RuntimeType {
     // Deprecated
 
     @objc static var uiBlurEffectStyle: RuntimeType { return uiBlurEffect_Style }
+  >>>>>>> master
 }

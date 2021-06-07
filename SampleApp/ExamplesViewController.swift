@@ -8,6 +8,17 @@ class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControlle
 
     override func viewDidLoad() {
         super.viewDidLoad()
+  <<<<<<< swift-4.2-support
+
+        // Swift 3.x compatibility
+        #if swift(>=4)
+            let foregroundColorKey = NSAttributedString.Key.foregroundColor
+        #else
+            let foregroundColorKey = NSForegroundColorAttributeName
+        #endif
+
+  =======
+  >>>>>>> master
         loadLayout(
             named: "Examples.xml",
             constants: [

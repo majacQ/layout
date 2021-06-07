@@ -918,9 +918,19 @@ extension UISearchBar {
     }
 }
 
+  <<<<<<< swift-4.2-support
+#if swift(>=4.2)
+    private typealias Segment = UISegmentedControl.Segment
+#else
+    private typealias Segment = UISegmentedControlSegment
+#endif
+
+private let controlSegments = RuntimeType.uiSegmentedControlSegment.values.mapValues { $0 as! Segment }
+  =======
 private let controlSegments = RuntimeType.uiSegmentedControlSegment.values.mapValues {
     $0 as! UISegmentedControl.Segment
 }
+  >>>>>>> master
 
 extension UISegmentedControl: TitleTextAttributes {
     open override class func create(with node: LayoutNode) throws -> UISegmentedControl {

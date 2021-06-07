@@ -20,7 +20,15 @@ extension UICollectionViewLayout {
             flowLayout.estimatedItemSize = flowLayout.itemSize
         }
         if #available(iOS 10.0, *) {
+  <<<<<<< swift-4.2-support
+            #if swift(>=4.2)
+                flowLayout.itemSize = UICollectionViewFlowLayout.automaticSize
+            #else
+                flowLayout.itemSize = UICollectionViewFlowLayoutAutomaticSize
+            #endif
+  =======
             flowLayout.itemSize = UICollectionViewFlowLayout.automaticSize
+  >>>>>>> master
         } else {
             flowLayout.itemSize = CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
         }
@@ -459,4 +467,22 @@ extension UICollectionViewCell: LayoutBacked {
         // Insert child views into `contentView` instead of directly
         contentView.didInsertChildNode(node, at: index)
     }
+  <<<<<<< swift-4.2-support
+
+    open override var intrinsicContentSize: CGSize {
+        guard let layoutNode = layoutNode, layoutNode.children.isEmpty else {
+            return super.intrinsicContentSize
+        }
+        return CGSize(width: UIView.noIntrinsicMetric, height: 44)
+    }
+
+    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+        if let layoutNode = layoutNode {
+            let height = (try? layoutNode.doubleValue(forSymbol: "height")) ?? 0
+            return CGSize(width: size.width, height: CGFloat(height))
+        }
+        return super.sizeThatFits(size)
+    }
+  =======
+  >>>>>>> master
 }
