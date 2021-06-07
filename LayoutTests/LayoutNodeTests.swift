@@ -22,7 +22,6 @@ private class TestViewController: UIViewController {
 }
 
 class LayoutNodeTests: XCTestCase {
-
     // MARK: Expression errors
 
     func testInvalidExpression() {
@@ -370,7 +369,7 @@ class LayoutNodeTests: XCTestCase {
         let node = LayoutNode(
             view: scrollView,
             state: [
-                "inset": UIEdgeInsets.zero,
+                "inset": UIEdgeInsets(),
                 "insetTop": 5,
             ],
             expressions: [
@@ -387,7 +386,7 @@ class LayoutNodeTests: XCTestCase {
         let scrollView = UIScrollView()
         let node = LayoutNode(
             view: scrollView,
-            state: ["inset": UIEdgeInsets.zero],
+            state: ["inset": UIEdgeInsets()],
             expressions: [
                 "contentInset": "inset",
                 "contentInset.top": "5",
@@ -564,6 +563,42 @@ class LayoutNodeTests: XCTestCase {
     }
 
     // MARK: memory leaks
+
+    func testLayoutNodeDoesNotRetainItself() throws {
+        weak var controller: UIViewController?
+        weak var view: UIView?
+        weak var node: LayoutNode?
+        try autoreleasepool {
+            let vc = UIViewController()
+            controller = vc
+            let _node = LayoutNode(view: UIView.self)
+            node = _node
+            view = _node.view
+            XCTAssertNotNil(view)
+            try _node.mount(in: vc)
+        }
+        XCTAssertNil(controller)
+        XCTAssertNil(view)
+        XCTAssertNil(node)
+    }
+
+    func testLayoutTreeDoesNotContainCycles() throws {
+        weak var root: LayoutNode?
+        weak var child: LayoutNode?
+        try autoreleasepool {
+            let vc = UIViewController()
+            let _node = LayoutNode(view: UIView.self, children: [
+                LayoutNode(view: UILabel.self, expressions: [
+                    "attributedText": "Hello World",
+                ]),
+            ])
+            root = _node
+            child = _node.children.first
+            try _node.mount(in: vc)
+        }
+        XCTAssertNil(root)
+        XCTAssertNil(child)
+    }
 
     func testLayoutWhereChildReferencesParentIsReleased() {
         let child = LayoutNode(id: "bar", expressions: [

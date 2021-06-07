@@ -1,7 +1,7 @@
 //  Copyright © 2017 Schibsted. All rights reserved.
 
-import UIKit
 import Foundation
+import UIKit
 
 func clearLayoutExpressionCache() {
     _colorCache.removeAll()
@@ -263,7 +263,7 @@ struct LayoutExpression {
             type: .cgFloat,
             impureSymbols: { symbol in
                 if case .postfix("%") = symbol {
-                    return { anyArgs in
+                    return { [unowned node] anyArgs in
                         guard let value = anyArgs[0] as? Double else {
                             throw Expression.Error.message("Type mismatch")
                         }
@@ -298,7 +298,9 @@ struct LayoutExpression {
             for: "parent.containerSize.\(prop)", in: node,
             impureSymbols: { symbol in
                 if case .variable("auto") = symbol {
-                    return { _ in try node.doubleValue(forSymbol: sizeProp) }
+                    return { [unowned node] _ in
+                        try node.doubleValue(forSymbol: sizeProp)
+                    }
                 }
                 return nil
             }
@@ -327,7 +329,9 @@ struct LayoutExpression {
             for: "containerSize.\(prop)", in: node,
             impureSymbols: { symbol in
                 if case .variable("auto") = symbol {
-                    return { _ in try node.doubleValue(forSymbol: sizeProp) }
+                    return { [unowned node] _ in
+                        try node.doubleValue(forSymbol: sizeProp)
+                    }
                 }
                 return nil
             }
@@ -396,9 +400,7 @@ struct LayoutExpression {
                 return nil
             }
             guard let value: Any = {
-                switch type.type {
-                case let .enum(_, values):
-                    return values[tail]
+                switch type.kind {
                 case let .options(_, values):
                     return values[tail]
                 case let .any(type as NSObject.Type):
@@ -477,7 +479,8 @@ struct LayoutExpression {
                                 return nil
                             }
                             return macroFn
-                        } else if let value = try constants(key) ?? node.constantValue(forSymbol: key) ?? staticConstant(for: key) {
+                        } else if let value = try constants(key) ?? type.values[key] ??
+                            node.constantValue(forSymbol: key) ?? staticConstant(for: key) {
                             allConstants[name] = value
                             return nil
                         } else if circular {
@@ -518,8 +521,13 @@ struct LayoutExpression {
                         let string: String
                         if "'\"".contains(name.first ?? " ") {
                             string = String(name.dropFirst().dropLast())
-                        } else if let value = (try constants(key) ?? node.constantValue(forSymbol: key) ?? staticConstant(for: key)) as? String {
+                        } else if let value = (try constants(key) ?? node.constantValue(forSymbol: key) ?? staticConstant(for: key)) {
+                            guard let value = value as? String else {
+                                return nil
+                            }
                             string = value
+                        } else if name != "[]" {
+                            throw SymbolError("Unknown function \(key)()", for: key)
                         } else {
                             return nil
                         }
@@ -654,8 +662,7 @@ struct LayoutExpression {
             return nil
         }
         var symbols = expression.symbols
-        for symbol in ["font", "textColor", "textAlignment", "lineBreakMode",
-                       "titleColor", "titleLabel.font"]
+        for symbol in ["font", "textColor", "textAlignment", "lineBreakMode", "titleColor", "titleLabel.font"]
             where node.viewExpressionTypes[symbol] != nil {
             symbols.insert(symbol)
         }
@@ -665,7 +672,7 @@ struct LayoutExpression {
         var previousHTMLString = ""
         var previousAttributedString = NSAttributedString()
         self.init(
-            evaluate: {
+            evaluate: { [unowned node] in
                 var parts = [Any]() // String or NSAttributedString
                 var htmlString = ""
                 func appendPart(_ part: Any) {
@@ -1144,22 +1151,41 @@ struct LayoutExpression {
         )
     }
 
-    init?(enumExpression: String, type: RuntimeType, for node: LayoutNode) {
-        guard case let .enum(_, values) = type.type else { preconditionFailure() }
+    init?(visualEffectExpression: String, for node: LayoutNode) {
+        let constants = RuntimeType.uiBlurEffect_Style.values
+        let defaultStyle = constants["regular"] as! UIBlurEffect.Style
+        let functions: [AnyExpression.Symbol: AnyExpression.SymbolEvaluator] = [
+            .function("UIBlurEffect", arity: 0): { _ in
+                UIBlurEffect(style: defaultStyle)
+            },
+            .function("UIBlurEffect", arity: 1): { args in
+                guard let style = args[0] as? UIBlurEffect.Style else {
+                    throw Expression.Error.message("\(Swift.type(of: args[0])) is not compatible with expected type \(UIBlurEffect.Style.self)")
+                }
+                return UIBlurEffect(style: style)
+            },
+            .function("UIVibrancyEffect", arity: 0): { _ in
+                UIVibrancyEffect(blurEffect: UIBlurEffect(style: defaultStyle))
+            },
+            .function("UIVibrancyEffect", arity: 1): { args in
+                let blurEffect: UIBlurEffect
+                switch args[0] {
+                case let style as UIBlurEffect.Style:
+                    blurEffect = UIBlurEffect(style: style)
+                case let blur as UIBlurEffect:
+                    blurEffect = blur
+                default:
+                    throw Expression.Error.message("\(Swift.type(of: args[0])) is not compatible with expected type \(UIBlurEffect.self)")
+                }
+                return UIVibrancyEffect(blurEffect: blurEffect)
+            },
+        ]
         self.init(
-            anyExpression: enumExpression,
-            type: type,
-            constants: { name in values[name] },
-            for: node
-        )
-    }
-
-    init?(optionsExpression: String, type: RuntimeType, for node: LayoutNode) {
-        guard case let .options(_, values) = type.type else { preconditionFailure() }
-        self.init(
-            anyExpression: optionsExpression,
-            type: type,
-            constants: { name in values[name] },
+            anyExpression: visualEffectExpression,
+            type: RuntimeType(UIVisualEffect.self),
+            nullable: true,
+            constants: { constants[$0] },
+            pureSymbols: { functions[$0] },
             for: node
         )
     }
@@ -1191,7 +1217,7 @@ struct LayoutExpression {
                         var invalidType: RuntimeType?
                         while let _parent = parent {
                             if let type = _parent._parameters[name] {
-                                switch type.type {
+                                switch type.kind {
                                 case let .any(subtype):
                                     switch subtype {
                                     case is String.Type,
@@ -1248,7 +1274,7 @@ struct LayoutExpression {
     }
 
     init?(expression: String, type: RuntimeType, for node: LayoutNode) {
-        switch type.type {
+        switch type.kind {
         case let .any(subtype):
             switch subtype {
             case is String.Type, is NSString.Type:
@@ -1267,17 +1293,15 @@ struct LayoutExpression {
                 self.init(urlExpression: expression, for: node)
             case is URLRequest.Type, is NSURLRequest.Type:
                 self.init(urlRequestExpression: expression, for: node)
+            case is UIVisualEffect.Type:
+                self.init(visualEffectExpression: expression, for: node)
             default:
                 self.init(anyExpression: expression, type: type, nullable: false, for: node)
             }
         case let .class(subtype):
             self.init(classExpression: expression, class: subtype, for: node)
-        case .struct:
+        case .struct, .options:
             self.init(anyExpression: expression, type: type, nullable: false, for: node)
-        case .enum:
-            self.init(enumExpression: expression, type: type, for: node)
-        case .options:
-            self.init(optionsExpression: expression, type: type, for: node)
         case .pointer("CGColor"):
             self.init(colorExpression: expression, type: type, for: node)
         case .pointer("CGImage"):

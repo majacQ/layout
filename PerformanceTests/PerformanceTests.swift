@@ -1,7 +1,7 @@
 //  Copyright © 2017 Schibsted. All rights reserved.
 
-import XCTest
 import Layout
+import XCTest
 
 private let xmlURL = Bundle(for: PerformanceTests.self).url(forResource: "Example", withExtension: "xml")!
 private let nodeCount: Int = {
@@ -11,7 +11,6 @@ private let nodeCount: Int = {
 }()
 
 class PerformanceTests: XCTestCase {
-
     // MARK: Create and mount
 
     private func createNodes(_ count: Int) -> LayoutNode {

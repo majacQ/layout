@@ -1,13 +1,12 @@
 //  Copyright © 2017 Schibsted. All rights reserved.
 
-import Foundation
 import CoreGraphics
+import Foundation
 import QuartzCore
 import UIKit
 import WebKit
 
 public extension RuntimeType {
-
     // MARK: Swift
 
     @objc static let any = RuntimeType(Any.self)
@@ -64,6 +63,33 @@ public extension RuntimeType {
             "layerMaxXMaxYCorner": UIntOptionSet(rawValue: 8),
         ] as [String: UIntOptionSet])
     }()
+
+    @objc static let caLayerContentsGravity = RuntimeType([
+        "center": .center,
+        "top": .top,
+        "bottom": .bottom,
+        "left": .left,
+        "right": .right,
+        "topLeft": .topLeft,
+        "topRight": .topRight,
+        "bottomLeft": .bottomLeft,
+        "bottomRight": .bottomRight,
+        "resize": .resize,
+        "resizeAspect": .resizeAspect,
+        "resizeAspectFill": .resizeAspectFill,
+    ] as [String: CALayerContentsGravity])
+
+    @objc static let caMediaTimingFillMode = RuntimeType([
+        "backwards": .backwards,
+        "forwards": .forwards,
+        "both": .both,
+        "removed": .removed,
+    ] as [String: CAMediaTimingFillMode])
+
+    @objc static let caLayerContentsFilter = RuntimeType([
+        "nearest": .nearest,
+        "linear": .linear,
+    ] as [String: CALayerContentsFilter])
 
     // MARK: UIKit
 
@@ -150,11 +176,15 @@ public extension RuntimeType {
         ] as [String: UIAccessibilityTraits]))
         type.caster = { value in
             if let values = value as? [UIAccessibilityTraits] {
+  <<<<<<< swift-4.2-support
                 #if swift(>=4.2)
                     return UIAccessibilityTraits(rawValue: values.map { $0.rawValue}.reduce(0 as UInt64) { $0 + $1 })
                 #else
                     return values.reduce(0) { $0 + $1 }
                 #endif
+  =======
+                return UIAccessibilityTraits(rawValue: values.map { $0.rawValue }.reduce(0 as UInt64) { $0 + $1 })
+  >>>>>>> master
             }
             return value as? UIAccessibilityTraits
         }
@@ -316,6 +346,90 @@ public extension RuntimeType {
         "no": .no,
         "yes": .yes,
     ] as [String: UITextAutocorrectionType])
+  <<<<<<< swift-4.2-support
+  =======
+    @objc static let uiTextContentType: RuntimeType = {
+        if #available(iOS 10.0, *) {
+            var contentTypes = [
+                "name": .name,
+                "namePrefix": .namePrefix,
+                "givenName": .givenName,
+                "middleName": .middleName,
+                "familyName": .familyName,
+                "nameSuffix": .nameSuffix,
+                "nickname": .nickname,
+                "jobTitle": .jobTitle,
+                "organizationName": .organizationName,
+                "location": .location,
+                "fullStreetAddress": .fullStreetAddress,
+                "streetAddressLine1": .streetAddressLine1,
+                "streetAddressLine2": .streetAddressLine2,
+                "addressCity": .addressCity,
+                "addressState": .addressState,
+                "addressCityAndState": .addressCityAndState,
+                "sublocality": .sublocality,
+                "countryName": .countryName,
+                "postalCode": .postalCode,
+                "telephoneNumber": .telephoneNumber,
+                "emailAddress": .emailAddress,
+                "URL": .URL,
+                "creditCardNumber": .creditCardNumber,
+                // Compatibility
+                "username": .name,
+                "password": .name,
+                "newPassword": .name,
+                "oneTimeCode": .name,
+            ] as [String: UITextContentType]
+            if #available(iOS 11.0, *) {
+                contentTypes["username"] = .username
+                contentTypes["password"] = .password
+            }
+            if #available(iOS 12.0, *) {
+                contentTypes["newPassword"] = .newPassword
+                contentTypes["oneTimeCode"] = .oneTimeCode
+            }
+            return RuntimeType(contentTypes)
+        }
+        return RuntimeType(Set([
+            "name",
+            "namePrefix",
+            "givenName",
+            "middleName",
+            "familyName",
+            "nameSuffix",
+            "nickname",
+            "jobTitle",
+            "organizationName",
+            "location",
+            "fullStreetAddress",
+            "streetAddressLine1",
+            "streetAddressLine2",
+            "addressCity",
+            "addressState",
+            "addressCityAndState",
+            "sublocality",
+            "countryName",
+            "postalCode",
+            "telephoneNumber",
+            "emailAddress",
+            "URL",
+            "creditCardNumber",
+            "username",
+            "password",
+            "newPassword",
+            "oneTimeCode",
+        ]))
+    }()
+
+    @objc static let uiTextInputPasswordRules: RuntimeType = {
+        if #available(iOS 12.0, *) {
+            // TODO: allow configuration with descriptor String?
+            return RuntimeType(UITextInputPasswordRules.self)
+        }
+        return .any
+    }()
+
+  >>>>>>> master
     @objc static let uiTextSmartQuotesType: RuntimeType = {
         if #available(iOS 11.0, *) {
             return RuntimeType([
@@ -636,7 +750,11 @@ public extension RuntimeType {
                 "scrollableAxes": .scrollableAxes,
                 "never": .never,
                 "always": .always,
+  <<<<<<< swift-4.2-support
             ] as [String: ContentInsetAdjustmentBehavior])
+  =======
+            ] as [String: UIScrollView.ContentInsetAdjustmentBehavior])
+  >>>>>>> master
         }
         return RuntimeType([
             "automatic": 0,
@@ -646,6 +764,13 @@ public extension RuntimeType {
         ] as [String: Int])
     }()
 
+  <<<<<<< swift-4.2-support
+  =======
+    @objc static let uiScrollView_DecelerationRate = RuntimeType([
+        "normal": .normal,
+        "fast": .fast,
+    ] as [String: UIScrollView.DecelerationRate])
+  >>>>>>> master
     @objc static let uiScrollView_IndicatorStyle = RuntimeType([
         "default": .default,
         "black": .black,
@@ -685,7 +810,11 @@ public extension RuntimeType {
                 "immediate": .immediate,
                 "fast": .fast,
                 "slow": .slow,
+  <<<<<<< swift-4.2-support
             ] as [String: ReorderingCadence])
+  =======
+            ] as [String: UICollectionView.ReorderingCadence])
+  >>>>>>> master
         }
         return RuntimeType([
             "immediate": 0,
@@ -693,6 +822,10 @@ public extension RuntimeType {
             "slow": 2,
         ] as [String: Int])
     }()
+  <<<<<<< swift-4.2-support
+  =======
+
+  >>>>>>> master
     @objc static let uiCollectionViewFlowLayout_SectionInsetReference: RuntimeType = {
         if #available(iOS 11.0, *) {
             #if swift(>=4.2)
@@ -704,7 +837,11 @@ public extension RuntimeType {
                 "fromContentInset": .fromContentInset,
                 "fromSafeArea": .fromSafeArea,
                 "fromLayoutMargins": .fromLayoutMargins,
+  <<<<<<< swift-4.2-support
             ] as [String: SectionInsetReference])
+  =======
+            ] as [String: UICollectionViewFlowLayout.SectionInsetReference])
+  >>>>>>> master
         }
         return RuntimeType([
             "fromContentInset": 0,
@@ -752,11 +889,19 @@ public extension RuntimeType {
     ] as [String: UIStackView.Alignment])
 
     // Deprecated
+  <<<<<<< swift-4.2-support
 
     @objc static var uiLayoutConstraintAxis: RuntimeType { return nsLayoutConstraint_Axis }
     @objc static var uiStackViewDistribution: RuntimeType { return uiStackView_Distribution }
     @objc static var uiStackViewAlignment: RuntimeType { return uiStackView_Alignment }
 
+  =======
+
+    @objc static var uiLayoutConstraintAxis: RuntimeType { return nsLayoutConstraint_Axis }
+    @objc static var uiStackViewDistribution: RuntimeType { return uiStackView_Distribution }
+    @objc static var uiStackViewAlignment: RuntimeType { return uiStackView_Alignment }
+
+  >>>>>>> master
     // MARK: UITableViewCell
 
     @objc static let uiTableViewCell_AccessoryType = RuntimeType([
@@ -812,7 +957,11 @@ public extension RuntimeType {
             return RuntimeType([
                 "fromCellEdges": .fromCellEdges,
                 "fromAutomaticInsets": .fromAutomaticInsets,
+  <<<<<<< swift-4.2-support
             ] as [String: SeparatorInsetReference])
+  =======
+            ] as [String: UITableView.SeparatorInsetReference])
+  >>>>>>> master
         }
         return RuntimeType([
             "fromCellEdges": 0,
@@ -824,6 +973,7 @@ public extension RuntimeType {
 
     @objc static var uiTableViewStyle: RuntimeType { return uiTableView_Style }
     @objc static var uiTableViewSeparatorInsetReference: RuntimeType { return uiTableView_SeparatorInsetReference }
+  <<<<<<< swift-4.2-support
 
     // MARK: UIWebView
 
@@ -843,6 +993,8 @@ public extension RuntimeType {
 
     @objc static var uiWebPaginationMode: RuntimeType { return uiWebView_PaginationMode }
     @objc static var uiWebPaginationBreakingMode: RuntimeType { return uiWebView_PaginationBreakingMode }
+  =======
+  >>>>>>> master
 
     // MARK: WebKit
 
@@ -941,7 +1093,11 @@ public extension RuntimeType {
                 "allowPrivate": .allowPrivate,
                 "allowReadOnly": .allowReadOnly,
                 "allowReadWrite": .allowReadWrite,
+  <<<<<<< swift-4.2-support
             ] as [String: PermissionOptions])
+  =======
+            ] as [String: UICloudSharingController.PermissionOptions])
+  >>>>>>> master
         }
         return RuntimeType([
             "allowPublic": 0,
@@ -980,13 +1136,21 @@ public extension RuntimeType {
             return RuntimeType([
                 "compatible": .compatible,
                 "current": .current,
+  <<<<<<< swift-4.2-support
             ] as [String: ImageURLExportPreset])
+  =======
+            ] as [String: UIImagePickerController.ImageURLExportPreset])
+  >>>>>>> master
         }
         return RuntimeType([
             "compatible": IntOptionSet(rawValue: 1),
             "current": IntOptionSet(rawValue: 2),
         ] as [String: IntOptionSet])
     }()
+  <<<<<<< swift-4.2-support
+  =======
+
+  >>>>>>> master
     @objc static let uiImagePickerController_SourceType = RuntimeType([
         "photoLibrary": .photoLibrary,
         "camera": .camera,
@@ -1028,7 +1192,11 @@ public extension RuntimeType {
             return RuntimeType([
                 "leading": .leading,
                 "trailing": .trailing,
+  <<<<<<< swift-4.2-support
             ] as [String: PrimaryEdge])
+  =======
+            ] as [String: UISplitViewController.PrimaryEdge])
+  >>>>>>> master
         }
         return RuntimeType([
             "leading": 0,
@@ -1040,4 +1208,41 @@ public extension RuntimeType {
 
     @objc static var uiSplitViewControllerDisplayMode: RuntimeType { return uiSplitViewController_DisplayMode }
     @objc static var uiSplitViewControllerPrimaryEdge: RuntimeType { return uiSplitViewController_PrimaryEdge }
+  <<<<<<< swift-4.2-support
+  =======
+
+    // MARK: UIVisualEffectView
+
+    @objc static let uiBlurEffect_Style: RuntimeType = {
+        let extraDark: UIBlurEffect.Style
+        let regular: UIBlurEffect.Style
+        let prominent: UIBlurEffect.Style
+        if #available(iOS 10.0, *) {
+            #if os(tvOS)
+                extraDark = .extraDark
+            #else
+                extraDark = .dark
+            #endif
+            regular = .regular
+            prominent = .prominent
+        } else {
+            extraDark = .dark
+            regular = .light
+            prominent = .extraLight
+        }
+        return RuntimeType([
+            "extraLight": .extraLight,
+            "light": .light,
+            "dark": .dark,
+            // TODO: is there any way to warn when using these on an unsupported OS version?
+            "extraDark": extraDark,
+            "regular": regular,
+            "prominent": prominent,
+        ] as [String: UIBlurEffect.Style])
+    }()
+
+    // Deprecated
+
+    @objc static var uiBlurEffectStyle: RuntimeType { return uiBlurEffect_Style }
+  >>>>>>> master
 }

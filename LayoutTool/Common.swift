@@ -70,18 +70,17 @@ func enumerateFiles(withInputURL inputURL: URL,
                     concurrent: Bool = true,
                     block: @escaping (URL, URL) throws -> () throws -> Void) -> [Error] {
     guard let resourceValues = try? inputURL.resourceValues(
-        forKeys: Set([.isDirectoryKey, .isAliasFileKey, .isSymbolicLinkKey])) else {
+        forKeys: Set([.isDirectoryKey, .isAliasFileKey, .isSymbolicLinkKey])
+    ) else {
         if FileManager.default.fileExists(atPath: inputURL.path) {
             return [FormatError.reading("failed to read attributes for \(inputURL.path)")]
         }
         return [FormatError.options("file not found at \(inputURL.path)")]
     }
-    if !options.followSymlinks &&
-        (resourceValues.isAliasFile == true || resourceValues.isSymbolicLink == true) {
+    if !options.followSymlinks, (resourceValues.isAliasFile ?? resourceValues.isSymbolicLink) == true {
         return [FormatError.options("symbolic link or alias was skipped: \(inputURL.path)")]
     }
-    if resourceValues.isDirectory == false &&
-        !options.supportedFileExtensions.contains(inputURL.pathExtension) {
+    if resourceValues.isDirectory == false, !options.supportedFileExtensions.contains(inputURL.pathExtension) {
         return [FormatError.options("unsupported file type: \(inputURL.path)")]
     }
 
@@ -103,8 +102,9 @@ func enumerateFiles(withInputURL inputURL: URL,
                    outputURL: URL?,
                    options: FileOptions,
                    block: @escaping (URL, URL) throws -> () throws -> Void) {
+        let inputURL = inputURL.standardizedFileURL
         for excludedURL in excludedURLs {
-            if inputURL.absoluteString.hasPrefix(excludedURL.absoluteString) {
+            if inputURL.absoluteString.hasPrefix(excludedURL.standardizedFileURL.absoluteString) {
                 return
             }
         }
@@ -131,7 +131,8 @@ func enumerateFiles(withInputURL inputURL: URL,
                 }
             }
             guard let files = try? manager.contentsOfDirectory(
-                at: inputURL, includingPropertiesForKeys: keys, options: .skipsHiddenFiles) else {
+                at: inputURL, includingPropertiesForKeys: keys, options: .skipsHiddenFiles
+            ) else {
                 onComplete { throw FormatError.reading("failed to read contents of directory at \(inputURL.path)") }
                 return
             }
@@ -147,8 +148,8 @@ func enumerateFiles(withInputURL inputURL: URL,
                               block: block)
                 }
             }
-        } else if options.followSymlinks &&
-            (resourceValues.isSymbolicLink == true || resourceValues.isAliasFile == true) {
+        } else if options.followSymlinks,
+            resourceValues.isSymbolicLink == true || resourceValues.isAliasFile == true {
             let resolvedURL = inputURL.resolvingSymlinksInPath()
             enumerate(inputURL: resolvedURL,
                       excluding: excludedURLs,

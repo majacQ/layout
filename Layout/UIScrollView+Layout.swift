@@ -12,7 +12,7 @@ extension UIScrollView {
         types["zoomScale"] = .cgFloat
         types["maximumZoomScale"] = .cgFloat
         types["minimumZoomScale"] = .cgFloat
-        types["decelerationRate"] = .cgFloat
+        types["decelerationRate"] = .uiScrollView_DecelerationRate
 
         #if arch(i386) || arch(x86_64)
             // Private properties
@@ -75,7 +75,7 @@ extension UIScrollView {
                 x: round(contentOffset.x / frame.size.width) * frame.width - contentInset.left,
                 y: round(contentOffset.y / frame.size.height) * frame.height - contentInset.top
             )
-            guard !offset.x.isNaN && !offset.y.isNaN else { return }
+            guard !offset.x.isNaN, !offset.y.isNaN else { return }
             contentOffset = offset
         }
     }

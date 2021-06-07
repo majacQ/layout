@@ -1,13 +1,13 @@
 //  Copyright © 2017 Schibsted. All rights reserved.
 
-import XCTest
-import UIKit
-import GLKit
 import AVKit
+import GLKit
+import MapKit
 import SceneKit
 import SpriteKit
-import MapKit
+import UIKit
 import WebKit
+import XCTest
 
 @testable import Layout
 
@@ -22,7 +22,6 @@ class UIKitSymbols: XCTestCase {
         let classes = objc_copyClassList(&classCount)
         var names = ["SKView"] // Doesn't load otherwise for some reason
         for cls in UnsafeBufferPointer(start: classes, count: Int(classCount)) {
-            let cls: AnyClass = cls!
             if class_getSuperclass(cls) != nil,
                 cls.isSubclass(of: UIView.self) || cls.isSubclass(of: UIViewController.self) {
                 let name = NSStringFromClass(cls)
@@ -49,6 +48,8 @@ class UIKitSymbols: XCTestCase {
         ]
         let blacklist = [
             "AVPlayerViewControllerContentView",
+            "AVPlayerViewControllerCustomControlsView",
+            "AVPlayerViewControllerCustomControlsViewLayoutMarginsGuideProvidingView",
             "MKOverlayContainer",
             "UIAccessibility",
             "UIActionSheet",
@@ -149,7 +150,7 @@ class UIKitSymbols: XCTestCase {
             "UIZoomViewController",
         ]
         names = names.filter { name in
-            return whitelist.contains { name.hasPrefix($0) } &&
+            whitelist.contains { name.hasPrefix($0) } &&
                 !blacklist.contains { name.hasPrefix($0) }
         }
         names += [

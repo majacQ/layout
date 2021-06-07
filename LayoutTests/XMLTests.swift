@@ -4,7 +4,6 @@ import XCTest
 @testable import Layout
 
 class XMLTests: XCTestCase {
-
     // MARK: Malformed XML
 
     func testEmptyXML() {
@@ -174,7 +173,7 @@ class XMLTests: XCTestCase {
     }
 
     func testPreserveHTMLAttributes() {
-        let html = "An <img src=\"foo.jpg\" alt=\"foo\"/> tag"
+        let html = "An <img src=\"foo.jpg\"/> tag"
         let input = "<UILabel>\n    \(html)\n</UILabel>"
         let xmlData = input.data(using: .utf8)!
         let layout = try! Layout(xmlData: xmlData)

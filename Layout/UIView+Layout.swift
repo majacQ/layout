@@ -117,6 +117,8 @@ extension UIView: LayoutManaged {
                 "customAlignmentRectInsets",
                 "customBaselineOffsetFromBottom",
                 "customFirstBaselineOffsetFromContentTop",
+                "customFirstBaselineOffsetFromTop",
+                "customScreenScale",
                 "deliversButtonsForGesturesToSuperview",
                 "deliversTouchesForGesturesToSuperview",
                 "edgesInsettingLayoutMarginsFromSafeArea",
@@ -129,6 +131,8 @@ extension UIView: LayoutManaged {
                 "invalidatingIntrinsicContentSizeAlsoInvalidatesSuperview",
                 "isBaselineRelativeAlignmentRectInsets",
                 "layoutMarginsFollowReadableWidth",
+                "maximumLayoutSize",
+                "minimumLayoutSize",
                 "needsDisplayOnBoundsChange",
                 "neverCacheContentLayoutSize",
                 "previewingSegueTemplateStorage",
@@ -138,6 +142,10 @@ extension UIView: LayoutManaged {
                 "wantsDeepColorDrawing",
             ] {
                 types[name] = nil
+                let name = "\(name)."
+                for key in types.keys where key.hasPrefix(name) {
+                    types[key] = nil
+                }
             }
         #endif
         return types
@@ -163,8 +171,8 @@ extension UIView: LayoutManaged {
     @objc open class var bodyExpression: String? {
         let types = cachedExpressionTypes
         for key in ["attributedText", "attributedTitle", "text", "title"] {
-            if let type = types[key], case let .any(kind) = type.type,
-                kind is String.Type || kind is NSAttributedString.Type {
+            if let type = types[key], case let .any(subtype) = type.kind,
+                subtype is String.Type || subtype is NSAttributedString.Type {
                 return key
             }
         }
@@ -617,6 +625,7 @@ extension UILabel {
         types["textAlignment"] = .nsTextAlignment
         types["lineBreakMode"] = .nsLineBreakMode
         types["baselineAdjustment"] = .uiBaselineAdjustment
+        types["enablesMarqueeWhenAncestorFocused"] = .bool
 
         #if arch(i386) || arch(x86_64)
             // Private properties
@@ -641,6 +650,18 @@ extension UILabel {
         #endif
         return types
     }
+
+    open override func setValue(_ value: Any, forExpression name: String) throws {
+        if #available(iOS 12.0, *) {} else {
+            switch name {
+            case "enablesMarqueeWhenAncestorFocused":
+                return // does nothing
+            default:
+                break
+            }
+        }
+        try super.setValue(value, forExpression: name)
+    }
 }
 
 private let dragAndDropOptions: [String: RuntimeType] = [
@@ -661,6 +682,8 @@ extension UITextField {
         types["leftViewMode"] = .uiTextFieldViewMode
         types["rightViewMode"] = .uiTextFieldViewMode
         types["minimumFontSize"] = .cgFloat
+        types["passwordRules"] = .uiTextInputPasswordRules
+        types["textContentType"] = .uiTextContentType
         for (name, type) in dragAndDropOptions {
             types[name] = type
         }
@@ -722,6 +745,16 @@ extension UITextField {
         case "returnKeyType": returnKeyType = value as! UIReturnKeyType
         case "enablesReturnKeyAutomatically": enablesReturnKeyAutomatically = value as! Bool
         case "isSecureTextEntry": isSecureTextEntry = value as! Bool
+        case "passwordRules":
+            // TODO: warn about unavailability
+            if #available(iOS 12.0, *) {
+                passwordRules = value as? UITextInputPasswordRules
+            }
+        case "textContentType":
+            // TODO: warn about unavailability
+            if #available(iOS 10.0, *) {
+                textContentType = value as? UITextContentType
+            }
         case "smartQuotesType":
             // TODO: warn about unavailability
             if #available(iOS 11.0, *) {
@@ -885,6 +918,7 @@ extension UISearchBar {
     }
 }
 
+  <<<<<<< swift-4.2-support
 #if swift(>=4.2)
     private typealias Segment = UISegmentedControl.Segment
 #else
@@ -892,6 +926,11 @@ extension UISearchBar {
 #endif
 
 private let controlSegments = RuntimeType.uiSegmentedControlSegment.values.mapValues { $0 as! Segment }
+  =======
+private let controlSegments = RuntimeType.uiSegmentedControlSegment.values.mapValues {
+    $0 as! UISegmentedControl.Segment
+}
+  >>>>>>> master
 
 extension UISegmentedControl: TitleTextAttributes {
     open override class func create(with node: LayoutNode) throws -> UISegmentedControl {
@@ -1266,6 +1305,8 @@ extension UIInputView {
         // Private properties
         #if arch(i386) || arch(x86_64)
             for name in [
+                "assertSizingWithPredictionBar",
+                "backgroundEdgeInsets",
                 "contentRatio",
                 "leftContentViewSize",
                 "rightContentViewSize",
@@ -1339,66 +1380,45 @@ extension UIRefreshControl {
 }
 
 extension UIVisualEffectView {
+    open override class func create(with node: LayoutNode) throws -> UIVisualEffectView {
+        let defaultStyle = RuntimeType.uiBlurEffect_Style.values["regular"]! as! UIBlurEffect.Style
+        var effect = try node.value(forExpression: "effect") as? UIVisualEffect
+        let style = try node.value(forExpression: "effect.style") as? UIBlurEffect.Style
+        if effect == nil {
+            effect = UIBlurEffect(style: style ?? defaultStyle)
+        } else if let style = style {
+            switch effect {
+            case nil, is UIBlurEffect:
+                effect = UIBlurEffect(style: style)
+            case is UIVibrancyEffect:
+                effect = UIVibrancyEffect(blurEffect: UIBlurEffect(style: style))
+            case let effect:
+                throw LayoutError.message("\(type(of: effect)) does not have a style property")
+            }
+        }
+        return self.init(effect: effect)
+    }
+
     open override class var expressionTypes: [String: RuntimeType] {
         var types = super.expressionTypes
+        for (key, type) in UIView.cachedExpressionTypes {
+            types["contentView.\(key)"] = type
+        }
         #if arch(i386) || arch(x86_64)
-            // Private property
+            // Private properties
             types["backgroundEffects"] = nil
             types["contentEffects"] = nil
         #endif
         return types
     }
+
+    open override func didInsertChildNode(_ node: LayoutNode, at index: Int) {
+        // Insert child views into `contentView` instead of directly
+        contentView.didInsertChildNode(node, at: index)
+    }
 }
 
 private var baseURLKey = 1
-
-extension UIWebView {
-    open override class var expressionTypes: [String: RuntimeType] {
-        var types = super.expressionTypes
-        types["baseURL"] = .url
-        types["htmlString"] = .string
-        types["request"] = .urlRequest
-        types["paginationMode"] = .uiWebPaginationMode
-        types["paginationBreakingMode"] = .uiWebPaginationBreakingMode
-        for (key, type) in UIScrollView.expressionTypes {
-            types["scrollView.\(key)"] = type
-        }
-        // TODO: support loading data
-        // TODO: support inline html
-
-        #if arch(i386) || arch(x86_64)
-            // Private
-            types["detectsPhoneNumbers"] = nil
-        #endif
-        return types
-    }
-
-    open override class var bodyExpression: String? {
-        return "htmlString"
-    }
-
-    @nonobjc private var baseURL: URL? {
-        get { return objc_getAssociatedObject(self, &baseURLKey) as? URL }
-        set {
-            let url = baseURL.flatMap { $0.absoluteString.isEmpty ? nil : $0 }
-            objc_setAssociatedObject(self, &baseURLKey, url, .OBJC_ASSOCIATION_RETAIN)
-        }
-    }
-
-    open override func setValue(_ value: Any, forExpression name: String) throws {
-        switch name {
-        case "baseURL":
-            baseURL = value as? URL
-        case "htmlString":
-            loadHTMLString(value as! String, baseURL: baseURL)
-        case "request":
-            loadRequest(value as! URLRequest)
-        default:
-            try super.setValue(value, forExpression: name)
-        }
-    }
-}
-
 private var readAccessURLKey = 1
 
 extension WKWebView {
@@ -1419,6 +1439,7 @@ extension WKWebView {
         types["fileURL"] = .url
         types["readAccessURL"] = .url
         types["htmlString"] = .string
+        types["navigationDelegate"] = RuntimeType(WKNavigationDelegate.self)
         types["request"] = .urlRequest
         types["uiDelegate"] = RuntimeType(WKUIDelegate.self)
         types["UIDelegate"] = nil // TODO: find a way to automate this renaming
@@ -1443,7 +1464,7 @@ extension WKWebView {
     @nonobjc private var readAccessURL: URL? {
         get { return objc_getAssociatedObject(self, &readAccessURLKey) as? URL }
         set {
-            let url = readAccessURL.flatMap { $0.absoluteString.isEmpty ? nil : $0 }
+            let url = newValue.flatMap { $0.absoluteString.isEmpty ? nil : $0 }
             objc_setAssociatedObject(self, &readAccessURLKey, url, .OBJC_ASSOCIATION_RETAIN)
         }
     }
@@ -1451,7 +1472,7 @@ extension WKWebView {
     @nonobjc private var baseURL: URL? {
         get { return objc_getAssociatedObject(self, &baseURLKey) as? URL }
         set {
-            let url = baseURL.flatMap { $0.absoluteString.isEmpty ? nil : $0 }
+            let url = newValue.flatMap { $0.absoluteString.isEmpty ? nil : $0 }
             objc_setAssociatedObject(self, &baseURLKey, url, .OBJC_ASSOCIATION_RETAIN)
         }
     }

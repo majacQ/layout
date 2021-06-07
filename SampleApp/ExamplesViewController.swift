@@ -1,13 +1,14 @@
 //  Copyright © 2017 Schibsted. All rights reserved.
 
-import UIKit
 import Layout
+import UIKit
 
 class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControllerDelegate {
     private var selectedTab = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
+  <<<<<<< swift-4.2-support
 
         // Swift 3.x compatibility
         #if swift(>=4)
@@ -16,6 +17,8 @@ class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControlle
             let foregroundColorKey = NSForegroundColorAttributeName
         #endif
 
+  =======
+  >>>>>>> master
         loadLayout(
             named: "Examples.xml",
             constants: [
@@ -30,7 +33,7 @@ class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControlle
                 // Used in text example
                 "attributedString": NSAttributedString(
                     string: "attributed string",
-                    attributes: [foregroundColorKey: UIColor.red]
+                    attributes: [NSAttributedString.Key.foregroundColor: UIColor.red]
                 ),
                 "uppercased": { (args: [Any]) throws -> Any in
                     guard let string = args.first as? String else {

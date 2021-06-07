@@ -1,5 +1,85 @@
 # Change Log
 
+## [0.7.0](https://github.com/schibsted/layout/releases/tag/0.7.0) (2019-10-13)
+
+- Removed deprecated UIWebView integration (Apple is now rejecting apps that use UIWebView)
+- Fixed deprecation warnings in Xcode 11.1
+
+## [0.6.38](https://github.com/schibsted/layout/releases/tag/0.6.38) (2019-08-04)
+
+- Fixed crash when using UITableView or UICollectionView in iOS 13
+
+## [0.6.37](https://github.com/schibsted/layout/releases/tag/0.6.37) (2019-06-04)
+
+- Updated for Xcode 11 beta
+
+## [0.6.36](https://github.com/schibsted/layout/releases/tag/0.6.36) (2019-03-26)
+
+- Updated for Xcode 10.2
+
+## [0.6.35](https://github.com/schibsted/layout/releases/tag/0.6.35) (2018-12-01)
+
+- Fixed infinite recursion bug in UICollectionViewCell layout
+
+## [0.6.34](https://github.com/schibsted/layout/releases/tag/0.6.34) (2018-11-29)
+
+- Fixed a crash when using UITableView or UICollectionView subclasses
+- Fixed a bug with incorrect table cell layout (related to the crashing issue)
+- Fixed a bug where view hierarchy was re-initialized during unmounting
+
+## [0.6.33](https://github.com/schibsted/layout/releases/tag/0.6.33) (2018-11-16)
+
+- Fixed a race condition caused when an `@IBOutlet` setter calls `update()` or `setState()` on the `LayoutNode` that set it
+- Added a fix for `width="min(auto, fixedSize)"` expressions
+
+## [0.6.32](https://github.com/schibsted/layout/releases/tag/0.6.32) (2018-10-10)
+
+- Fixed table cell sizing bug caused by the previous fix
+
+## [0.6.31](https://github.com/schibsted/layout/releases/tag/0.6.31) (2018-10-08)
+
+- Fixed a bug that caused table cells in projects using Layout to collapse on iOS 12
+- Fixed a spurious assertion when using an undefined parameter
+- Fixed accidental sharing of reload cache between projects with same name
+
+## [0.6.30](https://github.com/schibsted/layout/releases/tag/0.6.30) (2018-08-02)
+
+- Fixed a retain cycle that caused LayoutNodes to leak after a bounds change or scroll event
+
+## [0.6.29](https://github.com/schibsted/layout/releases/tag/0.6.29) (2018-08-01)
+
+- Fixed retain cycles in LayoutExpression and LayoutNode that caused nodes and views to be leaked
+- Referencing `top/left/bottom/right/etc` of another node by id now works correctly when `useLegacyLayoutMode = false`
+
+## [0.6.28](https://github.com/schibsted/layout/releases/tag/0.6.28) (2018-07-20)
+
+- Improved support for UIVisualEffectView (see README for details)
+- Improved error messaging for misspelled function names in expressions
+- Fixed spurious 'Unknown property X of UILabel in Y' error message
+- Fixed infinite layout loop bug
+
+## [0.6.27](https://github.com/schibsted/layout/releases/tag/0.6.27) (2018-06-15)
+
+- Fixed all compiler warnings in Xcode 10 beta
+- Added support for new CoreAnimation enum types in iOS 12
+- Added support for iOS 12 UIScrollView.DecelerationRate type
+- Added support for iOS 12 UILabel.enablesMarqueeWhenAncestorFocused property
+- Layout now allows raw values to be used for enum or OptionSet expressions, which helps with backwards compatibility
+
+## [0.6.26](https://github.com/schibsted/layout/releases/tag/0.6.26) (2018-06-07)
+
+- Now supports building with Swift 4.2 in Xcode 10 beta
+- Fixed a layout regression in version 0.6.20 for nested auto-sized views
+- Layout now requires Xcode 9.3 or higher
+
+## [0.6.25](https://github.com/schibsted/layout/releases/tag/0.6.25) (2018-06-06)
+
+- Now supports Swift 3.4 or 4.1.5 in Xcode 10 beta (Swift 4.2 is not yet supported)
+- Fixed a bug where nested `Optional` state properties could not be referenced in expressions
+- Fixed crash when setting `UIButton.attributedTitle` property or using inline HTML
+- Setting `UIButton.attributedTitle` now preserves the `titleColor` and `titleLabel.font`
+- Added support for `accessibilityAttributedLabel`
+
 ## [0.6.24](https://github.com/schibsted/layout/releases/tag/0.6.24) (2018-05-09)
 
 - Significantly improved performance for inline HTML and NSAttributedString expressions

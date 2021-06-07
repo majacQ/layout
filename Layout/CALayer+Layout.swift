@@ -17,35 +17,11 @@ extension CALayer: LayoutConfigurable {
         ] {
             types[key] = .cgFloat
         }
-        types["contentsGravity"] = RuntimeType([
-            "center",
-            "top",
-            "bottom",
-            "left",
-            "right",
-            "topLeft",
-            "topRight",
-            "bottomLeft",
-            "bottomRight",
-            "resize",
-            "resizeAspect",
-            "resizeAspectFill",
-        ] as Set<String>)
+        types["contentsGravity"] = .caLayerContentsGravity
         types["edgeAntialiasingMask"] = .caEdgeAntialiasingMask
-        types["fillMode"] = RuntimeType([
-            "backwards",
-            "forwards",
-            "both",
-            "removed",
-        ] as Set<String>)
-        types["minificationFilter"] = RuntimeType([
-            "nearest",
-            "linear",
-        ] as Set<String>)
-        types["magnificationFilter"] = RuntimeType([
-            "nearest",
-            "linear",
-        ] as Set<String>)
+        types["fillMode"] = .caMediaTimingFillMode
+        types["minificationFilter"] = .caLayerContentsFilter
+        types["magnificationFilter"] = .caLayerContentsFilter
         types["maskedCorners"] = .caCornerMask
         // Explicitly disabled properties
         for name in [
@@ -103,6 +79,7 @@ extension CALayer: LayoutConfigurable {
                 "doublePosition",
                 "flipsHorizontalAxis",
                 "hitTestsAsOpaque",
+                "hitTestsContentsAlphaChannel",
                 "inheritsTiming",
                 "invertsShadow",
                 "isFlipped",
@@ -121,6 +98,7 @@ extension CALayer: LayoutConfigurable {
                 "sortsSublayers",
                 "stateTransitions",
                 "states",
+                "unsafeUnretainedDelegate",
                 "velocityStretch",
                 "wantsExtendedDynamicRangeContent",
             ] {
